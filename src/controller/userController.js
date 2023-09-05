@@ -35,6 +35,7 @@ export const signInController = async(req,res)=>{
          })
     }
     catch(err){
+        return res.status(StatusCodes.CREATED).json({success:false, message:"Unsuccesfull user", Error:err.message})
 
     }
 }
