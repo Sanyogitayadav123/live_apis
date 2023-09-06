@@ -16,7 +16,7 @@ const app = express()
 
 app.use(express.json())
 const __dirname = path.resolve()
-app.use('/public', express.static(path.join(__dirname, './public')))
+app.use('/api/public', express.static(path.join(__dirname, './public')))
 app.use(cors())
 
 // Routes 
