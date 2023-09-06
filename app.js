@@ -9,16 +9,17 @@ import brandRoutes from './src/routes/brandRoutes.js'
 
 const PORT = process.env.PORT ||5000
 
-const app = express()
-app.use(express.json())
-connectionDB()
 
+connectionDB()
+const app = express()
+
+app.use(express.json())
 const __dirname = path.resolve()
 app.use('/public', express.static(path.join(__dirname, './public')))
 
 
 // Routes 
-app.use('/api/users',userRoutes)
+app.use('/api/users',userRoutes) 
 app.use('/api/product',productRoutes)
 app.use('/api/category',categoryRoutes)
 app.use('/api/brand',brandRoutes)
