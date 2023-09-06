@@ -1,4 +1,5 @@
 import express from 'express'
+import cors from 'cors'
 import 'dotenv/config'
 import connectionDB from './src/db/db.js'
 import userRoutes from './src/routes/userRoutes.js'
@@ -16,7 +17,7 @@ const app = express()
 app.use(express.json())
 const __dirname = path.resolve()
 app.use('/public', express.static(path.join(__dirname, './public')))
-
+app.use(cors())
 
 // Routes 
 app.use('/api/users',userRoutes) 
