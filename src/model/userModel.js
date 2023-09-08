@@ -7,6 +7,7 @@ const userSchema = mongoose.Schema({
     },
     email:{
         type:String,
+        unique:true,
         required:true
     },
     phone:{
@@ -16,7 +17,11 @@ const userSchema = mongoose.Schema({
     password:{
         type:String,
         required:true
-    }
+    },
+    otp: {
+        value: { type: String },
+        expire: { type: Date },
+      },
 },
 { timestamps: true })
 
