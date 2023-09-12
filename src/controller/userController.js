@@ -4,9 +4,9 @@ import { StatusCodes } from 'http-status-codes';
 import Sib from 'sib-api-v3-sdk';
 import { validationResult } from 'express-validator';
 import path from 'path';
-import fs from 'fs'
+import fs from 'fs';
 
-const __dirname = path.resolve()
+const __dirname = path.resolve();
 // export const signUpController = async (req, res) => {
 //   const { name, email, phone, password } = req?.body;
 //   try {
@@ -29,11 +29,10 @@ const __dirname = path.resolve()
 //   }
 // };
 
-
 export const signUpController = async (req, res) => {
   // Extract data from the request body
   const { name, email, phone, password } = req.body;
-  const userImage = req?.file?.filename
+  const userImage = req?.file?.filename;
 
   // Validate request data using express-validator
   const errors = validationResult(req);
@@ -51,7 +50,7 @@ export const signUpController = async (req, res) => {
       email,
       phone,
       password: hashPassword,
-      userImage
+      userImage,
     });
     return res
       .status(StatusCodes.CREATED)
@@ -64,8 +63,6 @@ export const signUpController = async (req, res) => {
     });
   }
 };
-
-
 
 export const signInController = async (req, res) => {
   const { email, password } = req?.body;
@@ -83,7 +80,7 @@ export const signInController = async (req, res) => {
         .json({ passwordError: 'Password not matched' });
     }
     const token = await user.generateAuthToken();
-    return res.status(StatusCodes.OK).json({
+    return res.status(StatusCodes.OK).json({  
       success: true,
       message: 'User login is succesfull',
       user: user,
@@ -176,12 +173,10 @@ export const resetPasswordController = async (req, res) => {
     if (user.otp.expire < new Date()) {
       user.otp = undefined;
       await user.save();
-      return res
-        .status(StatusCodes.FORBIDDEN)
-        .json({
-          success: false,
-          error: 'Temporary password (OTP) has expired.',
-        });
+      return res.status(StatusCodes.FORBIDDEN).json({
+        success: false,
+        error: 'Temporary password (OTP) has expired.',
+      });
     }
 
     const newPasswordMatch = await bcrypt.compare(password, user.password);
@@ -198,16 +193,13 @@ export const resetPasswordController = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
-    return res
-      .status(StatusCodes.INTERNAL_SERVER_ERROR)
-      .json({
-        success: false,
-        message: 'An error occurred while resetting the password',
-        error: error.message,
-      });
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'An error occurred while resetting the password',
+      error: error.message,
+    });
   }
 };
-
 
 // export const updateUserController = async(req,res)=>{
 //   const id = req?.params?.id
@@ -237,7 +229,6 @@ export const resetPasswordController = async (req, res) => {
 //   }
 // }
 
-
 export const updateUserController = async (req, res) => {
   const id = req?.params?.id;
   const body = req?.body;
@@ -262,7 +253,12 @@ export const updateUserController = async (req, res) => {
     }
     if (newImage) {
       if (user.userImage) {
-        const imagePath = path.join(__dirname, 'public', 'userImage', user.userImage);
+        const imagePath = path.join(
+          __dirname,
+          'public',
+          'userImage',
+          user.userImage,
+        );
         if (fs.existsSync(imagePath)) {
           fs.unlinkSync(imagePath);
         } else {
@@ -279,7 +275,7 @@ export const updateUserController = async (req, res) => {
       user: user,
     });
   } catch (err) {
-    console.log('err', err)
+    console.log('err', err);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Failed to update user',
@@ -287,3 +283,20 @@ export const updateUserController = async (req, res) => {
     });
   }
 };
+
+
+export const getUserByidController = async(req,res)=>{
+  const{id} = req?.params
+  try {
+    const data = await UserModal.findById(id)
+    return res
+    .status(StatusCodes.CREATED)
+    .json({ success: true, message: 'Fatched user by Id', user: data });
+} catch (err) {
+  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: 'failed',
+    error: err.message,
+  });
+}
+}
