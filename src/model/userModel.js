@@ -22,6 +22,10 @@ const userSchema = mongoose.Schema({
         value: { type: String },
         expire: { type: Date },
       },
+      userImage:{
+        type:String
+      }
+
 },
 { timestamps: true })
 
