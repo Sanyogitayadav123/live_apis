@@ -2,9 +2,48 @@ import bcrypt from 'bcrypt';
 import UserModal from '../model/userModel.js';
 import { StatusCodes } from 'http-status-codes';
 import Sib from 'sib-api-v3-sdk';
+import { validationResult } from 'express-validator';
+import path from 'path';
+import fs from 'fs'
+
+const __dirname = path.resolve()
+// export const signUpController = async (req, res) => {
+//   const { name, email, phone, password } = req?.body;
+//   try {
+//     const hashPassword = await bcrypt.hash(password, 10);
+//     const data = await UserModal.create({
+//       name,
+//       email,
+//       phone,
+//       password: hashPassword,
+//     });
+//     return res
+//       .status(StatusCodes.CREATED)
+//       .json({ success: true, message: 'Succesfull user signup', user: data });
+//   } catch (err) {
+//     return res.status(StatusCodes.CREATED).json({
+//       success: false,
+//       message: 'Unsuccesfull user',
+//       Error: err.message,
+//     });
+//   }
+// };
+
 
 export const signUpController = async (req, res) => {
-  const { name, email, phone, password } = req?.body;
+  // Extract data from the request body
+  const { name, email, phone, password } = req.body;
+  const userImage = req?.file?.filename
+
+  // Validate request data using express-validator
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: 'Validation errors',
+      errors: errors.array(),
+    });
+  }
   try {
     const hashPassword = await bcrypt.hash(password, 10);
     const data = await UserModal.create({
@@ -12,18 +51,21 @@ export const signUpController = async (req, res) => {
       email,
       phone,
       password: hashPassword,
+      userImage
     });
     return res
       .status(StatusCodes.CREATED)
-      .json({ success: true, message: 'Succesfull user signup', user: data });
+      .json({ success: true, message: 'Successful user signup', user: data });
   } catch (err) {
-    return res.status(StatusCodes.CREATED).json({
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
-      message: 'Unsuccesfull user',
-      Error: err.message,
+      message: 'Unsuccessful user signup',
+      error: err.message,
     });
   }
 };
+
+
 
 export const signInController = async (req, res) => {
   const { email, password } = req?.body;
@@ -163,5 +205,85 @@ export const resetPasswordController = async (req, res) => {
         message: 'An error occurred while resetting the password',
         error: error.message,
       });
+  }
+};
+
+
+// export const updateUserController = async(req,res)=>{
+//   const id = req?.params?.id
+//   const body = req?.body
+//   const userImage = req?.file?.filename
+//   const errors = validationResult(body);
+//   if (!errors.isEmpty()) {
+//     return res.status(StatusCodes.BAD_REQUEST).json({
+//       success: false,
+//       message: 'Validation errors',
+//       errors: errors.array(),
+//     });
+//   }
+//   try {
+//     const data = await UserModal.findByIdAndUpdate(id,{body,userImage})
+//     return res.status(StatusCodes.OK).json({
+//       success: true,
+//       message: 'User update is succesfull',
+//       user: data,
+//     });
+//   } catch (err) {
+//     return res.status(StatusCodes.CREATED).json({
+//       success: false,
+//       message: 'Failed',
+//       Error: err.message,
+//     });
+//   }
+// }
+
+
+export const updateUserController = async (req, res) => {
+  const id = req?.params?.id;
+  const body = req?.body;
+  const newImage = req?.file?.filename; // New image filename
+  const errors = validationResult(body);
+
+  if (!errors.isEmpty()) {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      success: false,
+      message: 'Validation errors',
+      errors: errors.array(),
+    });
+  }
+
+  try {
+    const user = await UserModal.findById(id);
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+    if (newImage) {
+      if (user.userImage) {
+        const imagePath = path.join(__dirname, 'public', 'userImage', user.userImage);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        } else {
+          console.log(`File does not exist at ${imagePath}`);
+        }
+      }
+      user.userImage = newImage;
+    }
+    user.body = body;
+    await user.save();
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'User update is successful',
+      user: user,
+    });
+  } catch (err) {
+    console.log('err', err)
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Failed to update user',
+      Error: err.message,
+    });
   }
 };
