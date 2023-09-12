@@ -80,7 +80,7 @@ export const signInController = async (req, res) => {
     if (!isPasswordMatch) {
       return res
         .status(StatusCodes.NOT_FOUND)
-        .json({ message: 'Password not matched' });
+        .json({ passwordError: 'Password not matched' });
     }
     const token = await user.generateAuthToken();
     return res.status(StatusCodes.OK).json({
