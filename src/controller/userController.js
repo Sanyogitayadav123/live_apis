@@ -44,18 +44,19 @@ export const signUpController = async (req, res) => {
     });
   }
   try {
-    if(password){
-      const hashPassword = await bcrypt.hash(password, 10);
-    const data = await UserModal.create({
-      name,
-      email,
-      phone,
-      password: hashPassword,
-      userImage,
-    });
-    return res
-    .status(StatusCodes.CREATED)
-    .json({ success: true, message: 'Successful user signup', user: data });
+    if (password) {
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashPassword = await bcrypt.hash(password, salt);
+      const data = await UserModal.create({
+        name,
+        email,
+        phone,
+        password: hashPassword,
+        userImage,
+      });
+      return res
+        .status(StatusCodes.CREATED)
+        .json({ success: true, message: 'Successful user signup', user: data });
     }
     else{
       const data = await UserModal.create({
