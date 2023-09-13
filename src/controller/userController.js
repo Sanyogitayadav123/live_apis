@@ -31,7 +31,7 @@ const __dirname = path.resolve();
 
 export const signUpController = async (req, res) => {
   // Extract data from the request body
-  const { name, email, phone, password ,image} = req.body;
+  const { name, email, phone, password, image } = req.body;
   const userImage = req?.file?.filename;
 
   // Validate request data using express-validator
@@ -57,20 +57,17 @@ export const signUpController = async (req, res) => {
       return res
         .status(StatusCodes.CREATED)
         .json({ success: true, message: 'Successful user signup', user: data });
-    }
-    else{
+    } else {
       const data = await UserModal.create({
         name,
         email,
         phone,
-        userImage:image,
+        userImage: image,
       });
       return res
-      .status(StatusCodes.CREATED)
-      .json({ success: true, message: 'Successful user signup', user: data });
-      }
-   
-   
+        .status(StatusCodes.CREATED)
+        .json({ success: true, message: 'Successful user signup', user: data });
+    }
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -96,7 +93,7 @@ export const signInController = async (req, res) => {
         .json({ passwordError: 'Password not matched' });
     }
     const token = await user.generateAuthToken();
-    return res.status(StatusCodes.OK).json({  
+    return res.status(StatusCodes.OK).json({
       success: true,
       message: 'User login is succesfull',
       user: user,
@@ -249,8 +246,7 @@ export const updateUserController = async (req, res) => {
   const id = req?.params?.id;
   const body = req?.body;
   const newImage = req?.file?.filename; // New image filename
-  const errors = validationResult(body);
-
+  const errors = validationResult(req); // Validate the request, not just the body
   if (!errors.isEmpty()) {
     return res.status(StatusCodes.BAD_REQUEST).json({
       success: false,
@@ -260,13 +256,19 @@ export const updateUserController = async (req, res) => {
   }
 
   try {
-    const user = await UserModal.findById(id);
+    const user = await UserModal.findByIdAndUpdate(
+      id,
+      { ...body },
+      { new: true },
+    );
+
     if (!user) {
       return res.status(StatusCodes.NOT_FOUND).json({
         success: false,
         message: 'User not found',
       });
     }
+
     if (newImage) {
       if (user.userImage) {
         const imagePath = path.join(
@@ -283,36 +285,36 @@ export const updateUserController = async (req, res) => {
       }
       user.userImage = newImage;
     }
-    user.body = body;
+
     await user.save();
+
     return res.status(StatusCodes.OK).json({
       success: true,
       message: 'User update is successful',
       user: user,
     });
   } catch (err) {
-    console.log('err', err);
+    console.error('err', err);
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
       message: 'Failed to update user',
-      Error: err.message,
+      error: err.message,
     });
   }
 };
 
-
-export const getUserByidController = async(req,res)=>{
-  const{id} = req?.params
+export const getUserByidController = async (req, res) => {
+  const { id } = req?.params;
   try {
-    const data = await UserModal.findById(id)
+    const data = await UserModal.findById(id);
     return res
-    .status(StatusCodes.CREATED)
-    .json({ success: true, message: 'Fetched user by Id', user: data });
-} catch (err) {
-  return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-    success: false,
-    message: 'failed',
-    error: err.message,
-  });
-}
-}
+      .status(StatusCodes.CREATED)
+      .json({ success: true, message: 'Fetched user by Id', user: data });
+  } catch (err) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'failed',
+      error: err.message,
+    });
+  }
+};
