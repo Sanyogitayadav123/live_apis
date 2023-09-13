@@ -31,7 +31,7 @@ const __dirname = path.resolve();
 
 export const signUpController = async (req, res) => {
   // Extract data from the request body
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password ,image} = req.body;
   const userImage = req?.file?.filename;
 
   // Validate request data using express-validator
@@ -44,7 +44,8 @@ export const signUpController = async (req, res) => {
     });
   }
   try {
-    const hashPassword = await bcrypt.hash(password, 10);
+    if(password){
+      const hashPassword = await bcrypt.hash(password, 10);
     const data = await UserModal.create({
       name,
       email,
@@ -53,8 +54,22 @@ export const signUpController = async (req, res) => {
       userImage,
     });
     return res
+    .status(StatusCodes.CREATED)
+    .json({ success: true, message: 'Successful user signup', user: data });
+    }
+    else{
+      const data = await UserModal.create({
+        name,
+        email,
+        phone,
+        userImage:image,
+      });
+      return res
       .status(StatusCodes.CREATED)
       .json({ success: true, message: 'Successful user signup', user: data });
+      }
+   
+   
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
