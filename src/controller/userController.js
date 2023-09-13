@@ -44,6 +44,19 @@ export const signUpController = async (req, res) => {
     });
   }
   try {
+    const updates = Object.keys(body)
+    const allowedUpdates = [
+      'name',
+      'phone'
+    ]
+    const isValidUpdates = updates.every(update =>
+      allowedUpdates.includes(update)
+    )
+    if (!isValidUpdates) {
+      throw new Error(
+        ` Invalid updates`
+      )
+    }
     if (password) {
       const salt = await bcrypt.genSalt(saltRounds);
       const hashPassword = await bcrypt.hash(password, salt);
@@ -258,7 +271,7 @@ export const updateUserController = async (req, res) => {
   try {
     const user = await UserModal.findByIdAndUpdate(
       id,
-      { ...body },
+      { ...body ,newImage },
       { new: true },
     );
 
