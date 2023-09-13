@@ -306,7 +306,7 @@ export const getUserByidController = async(req,res)=>{
     const data = await UserModal.findById(id)
     return res
     .status(StatusCodes.CREATED)
-    .json({ success: true, message: 'Fatched user by Id', user: data });
+    .json({ success: true, message: 'Fetched user by Id', user: data });
 } catch (err) {
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
