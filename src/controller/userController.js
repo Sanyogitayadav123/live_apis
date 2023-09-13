@@ -31,7 +31,7 @@ const __dirname = path.resolve();
 
 export const signUpController = async (req, res) => {
   // Extract data from the request body
-  const { name, email, phone, password } = req.body;
+  const { name, email, phone, password ,image} = req.body;
   const userImage = req?.file?.filename;
 
   // Validate request data using express-validator
@@ -44,17 +44,33 @@ export const signUpController = async (req, res) => {
     });
   }
   try {
-    const hashPassword = await bcrypt.hash(password, 10);
-    const data = await UserModal.create({
-      name,
-      email,
-      phone,
-      password: hashPassword,
-      userImage,
-    });
-    return res
+    if (password) {
+      const salt = await bcrypt.genSalt(saltRounds);
+      const hashPassword = await bcrypt.hash(password, salt);
+      const data = await UserModal.create({
+        name,
+        email,
+        phone,
+        password: hashPassword,
+        userImage,
+      });
+      return res
+        .status(StatusCodes.CREATED)
+        .json({ success: true, message: 'Successful user signup', user: data });
+    }
+    else{
+      const data = await UserModal.create({
+        name,
+        email,
+        phone,
+        userImage:image,
+      });
+      return res
       .status(StatusCodes.CREATED)
       .json({ success: true, message: 'Successful user signup', user: data });
+      }
+   
+   
   } catch (err) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       success: false,
@@ -291,7 +307,7 @@ export const getUserByidController = async(req,res)=>{
     const data = await UserModal.findById(id)
     return res
     .status(StatusCodes.CREATED)
-    .json({ success: true, message: 'Fatched user by Id', user: data });
+    .json({ success: true, message: 'Fetched user by Id', user: data });
 } catch (err) {
   return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
     success: false,
