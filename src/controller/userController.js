@@ -325,10 +325,6 @@ export const forgotePasswordController = async (req, res) => {
           message: 'OTP sent successfully',
         });
       }
-
-      if (mail === 'error') {
-        throw new Error('OTP not sent');
-      }
     }
   } catch (error) {
     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
