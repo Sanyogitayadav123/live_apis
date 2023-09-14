@@ -33,7 +33,6 @@ export const signUpController = async (req, res) => {
   // Extract data from the request body
   const { name, email, phone, password, image } = req.body;
   const userImage = req?.file?.filename;
-
   // Validate request data using express-validator
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -44,6 +43,10 @@ export const signUpController = async (req, res) => {
     });
   }
   try {
+    const isExist = await UserModal.findOne({ email: req?.body?.email });
+    if (isExist) {
+      return { error: "Email already exists!!" };
+    }
     const updates = Object.keys(body)
     const allowedUpdates = [
       'name',
@@ -134,7 +137,6 @@ export const forgotePasswordController = async (req, res) => {
     const otp = Math.random().toString().substring(2, 8);
     const currentDate = new Date();
     const expire = currentDate.setMinutes(currentDate.getMinutes() + 5);
-
     user.otp = {
       value: otp,
       expire,
@@ -166,7 +168,7 @@ export const forgotePasswordController = async (req, res) => {
       <h2>Password Reset</h2>
       <p>Dear user,</p>
       <p>To reset your password, click on the following link:</p>
-      <p><a href="http://localhost:5000/api/users/reset-password">Reset Password</a></p>
+      <p><a href="https://genuine-smakager-5a1cc9.netlify.app/ResetPassword">Reset Password</a></p>
       <p>Your verification code <strong>${otp}</strong> is valid for 5 minutes</p>
       <p>Best regards,<br>Thank you</p>
       </div>
