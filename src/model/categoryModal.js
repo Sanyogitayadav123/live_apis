@@ -1,16 +1,15 @@
-import mongoose from 'mongoose'
+import mongoose from 'mongoose';
 
-
-const categorySchema = mongoose.Schema({
-    categoryName:{
-        type:String,
-        required:true
+const categorySchema = mongoose.Schema(
+  {
+    categoryName: {
+      type: String,
+      required: true,
     },
+  },
+  { timestamps: true },
+);
 
-},
-{ timestamps: true })
+const CategoryModal = mongoose.model('live-category', categorySchema);
 
-const CategoryModal = mongoose.model('live-category',categorySchema)
-
-export default CategoryModal
-  
+export default CategoryModal;

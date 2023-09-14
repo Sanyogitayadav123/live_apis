@@ -1,40 +1,41 @@
-import mongoose from 'mongoose'
-const productSchema = mongoose.Schema({
-    productName:{
-        type:String,
-        required:true
+import mongoose from 'mongoose';
+const productSchema = mongoose.Schema(
+  {
+    productName: {
+      type: String,
+      required: true,
     },
-    price:{
-        type:Number,
-        required:true
+    price: {
+      type: Number,
+      required: true,
     },
-    image:{
-        type:String,
-        required:true
+    image: {
+      type: String,
+      required: true,
     },
-    description:{
-        type:String,
+    description: {
+      type: String,
     },
-    qut:{
-        type:String,
-     required:true
+    qut: {
+      type: String,
+      required: true,
     },
-    categoryId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"live-category"
+    categoryId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'live-category',
     },
-    userId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"live-user-details"
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'live-user-details',
     },
-    brandId:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"live-brand"
+    brandId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'live-brand',
+    },
+  },
+  { timestamps: true },
+);
 
-    }
-},
-{ timestamps: true })
+const ProductModal = mongoose.model('live-product', productSchema);
 
-const ProductModal = mongoose.model('live-product',productSchema)
-
-export default ProductModal
+export default ProductModal;

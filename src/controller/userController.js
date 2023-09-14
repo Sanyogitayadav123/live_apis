@@ -5,29 +5,9 @@ import Sib from 'sib-api-v3-sdk';
 import { validationResult } from 'express-validator';
 import path from 'path';
 import fs from 'fs';
+import sendMail from '../../utils/sendMail.js';
 
 const __dirname = path.resolve();
-// export const signUpController = async (req, res) => {
-//   const { name, email, phone, password } = req?.body;
-//   try {
-//     const hashPassword = await bcrypt.hash(password, 10);
-//     const data = await UserModal.create({
-//       name,
-//       email,
-//       phone,
-//       password: hashPassword,
-//     });
-//     return res
-//       .status(StatusCodes.CREATED)
-//       .json({ success: true, message: 'Succesfull user signup', user: data });
-//   } catch (err) {
-//     return res.status(StatusCodes.CREATED).json({
-//       success: false,
-//       message: 'Unsuccesfull user',
-//       Error: err.message,
-//     });
-//   }
-// };
 
 export const signUpController = async (req, res) => {
   // Extract data from the request body
@@ -45,20 +25,15 @@ export const signUpController = async (req, res) => {
   try {
     const isExist = await UserModal.findOne({ email: req?.body?.email });
     if (isExist) {
-      return { error: "Email already exists!!" };
+      return { error: 'Email already exists!!' };
     }
-    const updates = Object.keys(body)
-    const allowedUpdates = [
-      'name',
-      'phone'
-    ]
-    const isValidUpdates = updates.every(update =>
-      allowedUpdates.includes(update)
-    )
+    const updates = Object.keys(body);
+    const allowedUpdates = ['name', 'phone'];
+    const isValidUpdates = updates.every((update) =>
+      allowedUpdates.includes(update),
+    );
     if (!isValidUpdates) {
-      throw new Error(
-        ` Invalid updates`
-      )
+      throw new Error(` Invalid updates`);
     }
     if (password) {
       const salt = await bcrypt.genSalt(saltRounds);
@@ -124,69 +99,69 @@ export const signInController = async (req, res) => {
   }
 };
 
-export const forgotePasswordController = async (req, res) => {
-  const email = req.body.email;
-  try {
-    const user = await UserModal.findOne({ email: email });
-    if (!user) {
-      return res.status(StatusCodes.NOT_FOUND).json({
-        success: false,
-        message: 'User not found',
-      });
-    }
-    const otp = Math.random().toString().substring(2, 8);
-    const currentDate = new Date();
-    const expire = currentDate.setMinutes(currentDate.getMinutes() + 5);
-    user.otp = {
-      value: otp,
-      expire,
-    };
+// export const forgotePasswordController = async (req, res) => {
+//   const email = req.body.email;
+//   try {
+//     const user = await UserModal.findOne({ email: email });
+//     if (!user) {
+//       return res.status(StatusCodes.NOT_FOUND).json({
+//         success: false,
+//         message: 'User not found',
+//       });
+//     }
+//     const otp = Math.random().toString().substring(2, 8);
+//     const currentDate = new Date();
+//     const expire = currentDate.setMinutes(currentDate.getMinutes() + 5);
+//     user.otp = {
+//       value: otp,
+//       expire,
+//     };
 
-    const client = Sib.ApiClient.instance;
-    const apiKey = client.authentications['api-key'];
-    apiKey.apiKey = process.env.API_KEY;
-    const tranEmailApi = new Sib.TransactionalEmailsApi();
+//     const client = Sib.ApiClient.instance;
+//     const apiKey = client.authentications['api-key'];
+//     apiKey.apiKey = process.env.API_KEY;
+//     const tranEmailApi = new Sib.TransactionalEmailsApi();
 
-    const sender = {
-      email: 'sanyogitavkaps@gmail.com',
-      name: `sanyogitavkaps@gmail.com`,
-    };
+//     const sender = {
+//       email: 'sanyogitavkaps@gmail.com',
+//       name: `sanyogitavkaps@gmail.com`,
+//     };
 
-    const receivers = [
-      {
-        email: req.body.email,
-      },
-    ];
+//     const receivers = [
+//       {
+//         email: req.body.email,
+//       },
+//     ];
 
-    await tranEmailApi.sendTransacEmail({
-      sender,
-      to: receivers,
-      subject: 'Password Reset',
-      textContent: 'Dear user, please reset your password',
-      htmlContent: `
-      <div style="font-family: Arial, sans-serif;">
-      <h2>Password Reset</h2>
-      <p>Dear user,</p>
-      <p>To reset your password, click on the following link:</p>
-      <p><a href="https://genuine-smakager-5a1cc9.netlify.app/ResetPassword">Reset Password</a></p>
-      <p>Your verification code <strong>${otp}</strong> is valid for 5 minutes</p>
-      <p>Best regards,<br>Thank you</p>
-      </div>
-      `,
-    });
+//     await tranEmailApi.sendTransacEmail({
+//       sender,
+//       to: receivers,
+//       subject: 'Password Reset',
+//       textContent: 'Dear user, please reset your password',
+//       htmlContent: `
+//       <div style="font-family: Arial, sans-serif;">
+//       <h2>Password Reset</h2>
+//       <p>Dear user,</p>
+//       <p>To reset your password, click on the following link:</p>
+//       <p><a href="https://genuine-smakager-5a1cc9.netlify.app/ResetPassword">Reset Password</a></p>
+//       <p>Your verification code <strong>${otp}</strong> is valid for 5 minutes</p>
+//       <p>Best regards,<br>Thank you</p>
+//       </div>
+//       `,
+//     });
 
-    await user.save();
-    return res.status(StatusCodes.OK).json({
-      success: true,
-      message: 'OTP sent successfully',
-    });
-  } catch (error) {
-    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+//     await user.save();
+//     return res.status(StatusCodes.OK).json({
+//       success: true,
+//       message: 'OTP sent successfully',
+//     });
+//   } catch (error) {
+//     return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
 
 export const resetPasswordController = async (req, res) => {
   const { email, otp, password } = req.body;
@@ -229,34 +204,6 @@ export const resetPasswordController = async (req, res) => {
   }
 };
 
-// export const updateUserController = async(req,res)=>{
-//   const id = req?.params?.id
-//   const body = req?.body
-//   const userImage = req?.file?.filename
-//   const errors = validationResult(body);
-//   if (!errors.isEmpty()) {
-//     return res.status(StatusCodes.BAD_REQUEST).json({
-//       success: false,
-//       message: 'Validation errors',
-//       errors: errors.array(),
-//     });
-//   }
-//   try {
-//     const data = await UserModal.findByIdAndUpdate(id,{body,userImage})
-//     return res.status(StatusCodes.OK).json({
-//       success: true,
-//       message: 'User update is succesfull',
-//       user: data,
-//     });
-//   } catch (err) {
-//     return res.status(StatusCodes.CREATED).json({
-//       success: false,
-//       message: 'Failed',
-//       Error: err.message,
-//     });
-//   }
-// }
-
 export const updateUserController = async (req, res) => {
   const id = req?.params?.id;
   const body = req?.body;
@@ -273,7 +220,7 @@ export const updateUserController = async (req, res) => {
   try {
     const user = await UserModal.findByIdAndUpdate(
       id,
-      { ...body ,newImage },
+      { ...body, newImage },
       { new: true },
     );
 
@@ -330,6 +277,63 @@ export const getUserByidController = async (req, res) => {
       success: false,
       message: 'failed',
       error: err.message,
+    });
+  }
+};
+
+export const forgotePasswordController = async (req, res) => {
+  try {
+    const email = req?.body?.email;
+    const user = await UserModal.findOne({ email });
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    if (user) {
+      const otp = Math.random().toString().substring(2, 8);
+      const currentDate = new Date();
+      const expire = currentDate.setMinutes(currentDate.getMinutes() + 5);
+      user.otp = {
+        value: otp,
+        expire,
+      };
+      const mail = await sendMail({
+        from: `"Shopping " <${process.env.SMTP_EMAIL}>`,
+        to: email,
+        subject: 'Forgot Password',
+        text: `Your OTP is ${otp} valid for 5 minutes`,
+        html:
+         `
+        <div style="font-family: Arial, sans-serif;">
+          <h2>Password Reset</h2>
+          <p>Dear user,</p>
+          <p>To reset your password, click on the following link:</p>
+          <p><a href="https://genuine-smakager-5a1cc9.netlify.app/ResetPassword">Reset Password</a></p>
+          <p>Your verification code <strong>${otp}</strong> is valid for 5 minutes</p>
+          <p>Best regards,<br>Thank you</p>
+        </div>`,
+      });
+
+      if (mail === 'success') {
+        await user.save();
+        return res.status(StatusCodes.OK).json({
+          success: true,
+          message: 'OTP sent successfully',
+        });
+      }
+
+      if (mail === 'error') {
+        throw new Error('OTP not sent');
+      }
+    }
+  } catch (error) {
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: error.message,
     });
   }
 };
