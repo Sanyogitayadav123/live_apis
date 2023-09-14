@@ -86,3 +86,20 @@ export const getProductController = async (req, res) => {
     }
 };
 
+export const getProductByIdController = async(req,res)=>{
+    const { id } = req?.params;
+    try {
+      const data = await ProductModal.findById(id).populate('userId')
+      .populate('brandId')
+      .populate('categoryId');
+      return res
+        .status(StatusCodes.CREATED)
+        .json({ success: true, message: 'Fetched product by Id', user: data });
+    } catch (err) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        success: false,
+        message: 'failed',
+        error: err.message,
+      });
+    }
+}
