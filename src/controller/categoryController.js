@@ -1,6 +1,8 @@
 import CategoryModal from '../model/categoryModal.js';
 import { StatusCodes } from 'http-status-codes';
 
+
+
 export const postCategoryController = async (req, res) => {
   const { categoryName } = req?.body;
   try {
