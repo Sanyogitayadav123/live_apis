@@ -19,7 +19,7 @@ export const postProductController = async (req, res) => {
 
     return res.status(StatusCodes.OK).json({
       success: true,
-      message: 'Product add is sucessfull !',
+      message: 'Product added successfully !',
       product: data,
     });
   } catch (err) {
@@ -54,11 +54,11 @@ export const postProductController = async (req, res) => {
 
 export const getProductController = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1; // Get the page number from the query parameters (default to 1)
-    const perPage = parseInt(req.query.perPage) || 10; // Get the number of items per page (default to 10)
+    const page = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.perPage) || 10;
 
-    const skip = (page - 1) * perPage; // Calculate the number of documents to skip
-    const totalProducts = await ProductModal.countDocuments(); // Get the total number of products
+    const skip = (page - 1) * perPage;
+    const totalProducts = await ProductModal.countDocuments();
 
     const data = await ProductModal.find()
       .skip(skip)
@@ -102,3 +102,64 @@ export const getProductByIdController = async (req, res) => {
     });
   }
 };
+
+export const updateProductByIdController = async (req, res) => {
+
+
+  try {
+    const { id } = req?.params;
+    const body = req?.body;
+    const image = req?.file?.filename;
+
+    const data = await ProductModal.findByIdAndUpdate(id, { ...body,image }, { new: true }).populate('userId')
+      .populate('brandId')
+      .populate('categoryId');
+    if (!data) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Product updated successfully!!',
+      product: data,
+    });
+  } catch (err) {
+    console.error('err', err);
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Failed to update product',
+      error: err.message,
+    });
+  }
+}
+
+
+export const deleteProductById = async (req, res) => {
+  const { id } = req.params;
+  const body = req?.body;
+
+  try {
+    const data = await ProductModal.findByIdAndDelete(id)
+    if (!data) {
+      return res.status(StatusCodes.NOT_FOUND).json({
+        success: false,
+        message: 'Product not found',
+      });
+    }
+    return res.status(StatusCodes.OK).json({
+      success: true,
+      message: 'Product deleted successfully',
+      product: data,
+    });
+  } catch (err) {
+    console.log('err', err)
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Failed to delete product',
+      error: err.message,
+    });
+  }
+}
