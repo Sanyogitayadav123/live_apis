@@ -1,44 +1,44 @@
 import mongoose from 'mongoose'
 import jwt from 'jsonwebtoken'
 const userSchema = mongoose.Schema({
-    name:{
-        type:String,
-        required:true
+    name: {
+        type: String,
+        required: true
     },
-    email:{
-        type:String,
-        unique:true,
-        required:true
+    email: {
+        type: String,
+        unique: true,
+        required: true
     },
-    phone:{
-        type:String,
+    phone: {
+        type: String,
     },
-    password:{
-        type:String,
+    password: {
+        type: String,
     },
     otp: {
         value: { type: String },
         expire: { type: Date },
-      },
-      userImage:{
-        type:String
-      }
+    },
+    userImage: {
+        type: String
+    }
 
 },
-{ timestamps: true })
+    { timestamps: true })
 
-userSchema.methods.generateAuthToken= async function(){
-    try{
-        const token = await jwt.sign({_id:this._id}, process.env.SECRET_KEY,{
-            expiresIn:'2h'
+userSchema.methods.generateAuthToken = async function () {
+    try {
+        const token = await jwt.sign({ _id: this._id }, process.env.SECRET_KEY, {
+            expiresIn: '2h'
         })
         return token
     }
-    catch(err){
-        console.log('Toekn is not generate', err)
+    catch (err) {
+        console.log('Token is not generated', err)
     }
 
 }
- const UserModal = mongoose.model('live-user-details',userSchema)
+const UserModal = mongoose.model('live-user-details', userSchema)
 
- export default UserModal
+export default UserModal
